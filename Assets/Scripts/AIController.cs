@@ -2,9 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityStandardAssets.Vehicles.Car;
+using System;
+using Random = UnityEngine.Random;
 
 public class AIController: MonoBehaviour
 {
+	private static int POPULATION_SIZE = 10;
+	private static int CHROMOSOMES_SIZE = 10;
+	private float[] accelerationChromosomes = new float[CHROMOSOMES_SIZE];
+
+	private float[]  steeringChromosomes= new float[CHROMOSOMES_SIZE];
 	public GameObject car;
 	private GameObject carClone;
 private SegmentDetector segDetector;
@@ -15,7 +22,12 @@ private SegmentDetector segDetector;
     {
 		segDetector = gameObject.GetComponent<SegmentDetector>(); // TODO: refactor code.
 		segDetector.vehicle = car;
-	//	generatePopulation();
+for(int i = 0; i < CHROMOSOMES_SIZE;i++) {
+        accelerationChromosomes[i]=(float)Math.Round( Random.Range(0.0f,1.0f), 2); // TODO: not hard-coded.
+	steeringChromosomes[i]=(float)Math.Round(Random.Range(-1.0f,1.0f),2);
+}	//	generatePopulation();
+Debug.Log(accelerationChromosomes[0]);
+Debug.Log(steeringChromosomes[0]);
 		}
 
 	private void Update()
