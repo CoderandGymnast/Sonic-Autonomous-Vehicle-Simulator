@@ -12,7 +12,7 @@ public class AIController : MonoBehaviour
 	private static int BARRIERS_WIDTH = 2;
 	private static int ROAD_WIDTH = 44;
 	private static int[] STARTING_POSITION = { ROAD_WIDTH / 2, 0, 5 }; // NOTE: to avoid cars falling off the map.
-	private static int POPULATION_SIZE = 100;
+	private static int POPULATION_SIZE = 50;
 	private static int CHROMOSOMES_SIZE = 10;
 	private float[,] accelerationChromosomes = new float[POPULATION_SIZE, CHROMOSOMES_SIZE];
 
@@ -26,6 +26,21 @@ public class AIController : MonoBehaviour
 	// Start is called before the first frame update
 
 	private int destroyCounter = 0; // TODO: move.
+
+	private void Awake()
+	{
+
+	}
+
+	private void logComponents(GameObject o)
+	{
+
+		Component[] components = o.GetComponents(typeof(Component));
+		foreach (Component component in components)
+		{
+			Debug.Log("Component: " + component.ToString());
+		}
+	}
 	void Start()
 	{
 		segmentDetector = gameObject.GetComponent<SegmentDetector>(); // TODO: refactor code.

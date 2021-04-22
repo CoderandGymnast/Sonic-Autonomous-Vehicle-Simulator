@@ -53,7 +53,6 @@ namespace UnityStandardAssets.Vehicles.Car
         public float CurrentSteerAngle{ get { return m_SteerAngle; }}
        
 		public float CurrentSpeed{ get {
-			//	Debug.Log("[CAR CONTROLLER CURRENT SPEED]: " + m_Rigidbody.velocity);
 				return m_Rigidbody.velocity.magnitude*2.23693629f; }}
         public float MaxSpeed{get { return m_Topspeed; }}
         public float Revs { get; private set; }
@@ -61,14 +60,14 @@ namespace UnityStandardAssets.Vehicles.Car
 
 		private void Awake()
 		{
-			//Debug.Log("[CAR CONTROLLER]: awake");
+             
+    
 			m_Rigidbody = GetComponent<Rigidbody>(); // TODO: note bugs.
 		}
 
 		// Use this for initialization
 		private void Start()
         {
-			//Debug.Log("[CAR CONTROLLER]: start");
             m_WheelMeshLocalRotations = new Quaternion[4];
             for (int i = 0; i < 4; i++)
             {
@@ -78,8 +77,6 @@ namespace UnityStandardAssets.Vehicles.Car
 
             m_MaxHandbrakeTorque = float.MaxValue;
 
-		//	Debug.Log("[CAR CONTROLLER]: init Rigidbody");
-          			//Debug.Log("[CAR CONTROLLER]: " + m_Rigidbody);
             m_CurrentTorque = m_FullTorqueOverAllWheels - (m_TractionControl*m_FullTorqueOverAllWheels);
         }
 
@@ -291,7 +288,7 @@ namespace UnityStandardAssets.Vehicles.Car
                 // is the tire slipping above the given threshhold
                 if (Mathf.Abs(wheelHit.forwardSlip) >= m_SlipLimit || Mathf.Abs(wheelHit.sidewaysSlip) >= m_SlipLimit)
                 {
-                    m_WheelEffects[i].EmitTyreSmoke();
+                    //m_WheelEffects[i].EmitTyreSmoke(); // NOTE: emit smoke.
 
                     // avoiding all four tires screeching at the same time
                     // if they do it can lead to some strange audio artefacts
