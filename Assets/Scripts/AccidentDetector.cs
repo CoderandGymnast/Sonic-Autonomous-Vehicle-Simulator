@@ -26,7 +26,6 @@ public class AccidentDetector : MonoBehaviour
 
 	private void OnCollisionEnter(Collision collision)
 	{
-		Debug.Log("OnCollisionEnter");
 		isCollided = true;
 	}
 }

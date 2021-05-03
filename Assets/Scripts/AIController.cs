@@ -8,9 +8,9 @@ using Random = UnityEngine.Random;
 public class AIController : MonoBehaviour
 {
 
-	private static int VEHICLE_WIDTH = 2; // TODO: not hard-coded.
-	private static int BARRIERS_WIDTH = 2;
-	private static int ROAD_WIDTH = 44;
+	private static int VEHICLE_WIDTH = 3; // TODO: not hard-coded.
+	private static int BARRIERS_WIDTH = 1; // TODO: nothard-coded.
+	private static int ROAD_WIDTH = 50; // TODO: not hard-coded.
 	private static float[] STARTING_POSITION = { ROAD_WIDTH / 2, 0.5f, 5 }; // NOTE: to avoid cars falling off the map.
 	private static int POPULATION_SIZE = 50;
 	private static int CHROMOSOMES_SIZE = 10;
@@ -29,7 +29,9 @@ public class AIController : MonoBehaviour
 
 	private void Awake()
 	{
-
+		//GameObject roadSegment = (GameObject)Resources.Load("RoadSegment", typeof(GameObject));
+		//roadSegment = Instantiate(roadSegment, new Vector3(0, 0, 0), Quaternion.identity);
+		//Debug.Log(roadSegment.GetComponentInChildren<Collider>().bounds.size.x);
 	}
 
 	private void logComponents(GameObject o)
@@ -118,10 +120,11 @@ public class AIController : MonoBehaviour
 		for (int i = 0; i < POPULATION_SIZE; i++)
 		{
 
-
-			Vector3 pos = new Vector3(Random.Range(BARRIERS_WIDTH + VEHICLE_WIDTH, ROAD_WIDTH - BARRIERS_WIDTH - VEHICLE_WIDTH), STARTING_POSITION[1], STARTING_POSITION[2]); // NOTE: position. 
+			// TODO: spawn with positions relative to map, not terrain.
+			Vector3 pos = new Vector3(Random.Range(BARRIERS_WIDTH + VEHICLE_WIDTH / 2, ROAD_WIDTH - BARRIERS_WIDTH - VEHICLE_WIDTH / 2), STARTING_POSITION[1], STARTING_POSITION[2]); // NOTE: position. 
 			Quaternion rot = Quaternion.Euler(0, 0, 0); // NOTE: rotation.
 			individuals[i] = Instantiate(car, pos, rot);
+
 		}
 	}
 
