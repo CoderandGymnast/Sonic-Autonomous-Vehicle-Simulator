@@ -11,7 +11,7 @@ public class AIController : MonoBehaviour
 	private static int VEHICLE_WIDTH = 2; // TODO: not hard-coded.
 	private static int BARRIERS_WIDTH = 2;
 	private static int ROAD_WIDTH = 44;
-	private static int[] STARTING_POSITION = { ROAD_WIDTH / 2, 0, 5 }; // NOTE: to avoid cars falling off the map.
+	private static float[] STARTING_POSITION = { ROAD_WIDTH / 2, 0.5f, 5 }; // NOTE: to avoid cars falling off the map.
 	private static int POPULATION_SIZE = 50;
 	private static int CHROMOSOMES_SIZE = 10;
 	private float[,] accelerationChromosomes = new float[POPULATION_SIZE, CHROMOSOMES_SIZE];
