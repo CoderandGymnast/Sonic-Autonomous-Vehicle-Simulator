@@ -83,7 +83,8 @@ public class AIController : MonoBehaviour
 			}
 			GameObject individual = individuals[i];
 			segmentDetector.vehicle = individual;
-			int currentSegment = segmentDetector.currentSegment;
+			int currSeg = segmentDetector.currSeg;
+			//Debug.Log(currSeg);
 			AccidentDetector accidentDetector = individual.GetComponent<AccidentDetector>(); // NOTE: placing in assets to use.
 			if (accidentDetector.isFalling() || accidentDetector.isCollided) // NOTE: check whether individual 'falled off the terrain' or 'is collided'
 			{
@@ -93,8 +94,8 @@ public class AIController : MonoBehaviour
 				continue;
 			}
 			CarController controller = individual.GetComponent<CarController>();
-			float acc = accelerationChromosomes[i, currentSegment];
-			float steer = steeringChromosomes[i, currentSegment];
+			float acc = accelerationChromosomes[i, currSeg];
+			float steer = steeringChromosomes[i, currSeg];
 			float footBrake = acc; // TODO: check value of footBrake.
 
 			controller.Move(steer, acc, footBrake, 0.0f); // TODO: not hard-coded.

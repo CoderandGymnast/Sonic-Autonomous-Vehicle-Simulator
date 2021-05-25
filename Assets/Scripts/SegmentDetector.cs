@@ -8,13 +8,16 @@ public class SegmentDetector : MonoBehaviour
 	private static int START_SEGMENT = 0;
 	public GameObject vehicle;
 	private int previousSegment;
-	public int currentSegment { get; private set; }
+	public int currSeg { get; private set; }
+
+	int[] stopZs = {100};
+	int[] stopXs = {50, 150};
 
 
 	// Start is called before the first frame update
 	void Start()
 	{
-		currentSegment = previousSegment = START_SEGMENT;
+		currSeg = previousSegment = START_SEGMENT;
 	}
 
 	// Update is called once per frame
@@ -26,44 +29,46 @@ public class SegmentDetector : MonoBehaviour
 			// TODO: not hard-coded.
 			double z = vehicle.transform.position.z;
 			double x = vehicle.transform.position.x;
-			if (z <= 80)
+			if (z <= stopZs[0])
 			{
 				if (z < 0) // NOTE: Math.Floor(-0.1) = -1.
 				{
 					z = 0;
-					currentSegment = 0;
+					currSeg = 0;
 					return;
 				}
 
-				currentSegment = (int)Math.Floor(z / 10);
+				currSeg = (int)Math.Floor(z / 10);
+			}
+			else if (x <= stopXs[0])
+			{
+				currSeg = (int)Math.Floor((Math.Atan((z - stopZs[0]) / (stopXs[0] - x)) / (Math.PI / 4))) + 9 + 1; // NOTE: Alpha < 45 => Additional = 0.
+			} else if(x <= stopXs[1])
+			{
+				int additional = (int)Math.Floor((x - stopXs[0]) / 10);
+				currSeg = 12 + additional;
+			} else {
 
 			}
-			else if (x <= 44)
-			{
 
-				currentSegment = (int)Math.Floor((Math.Atan((z - 80) / (44 - x)) / (Math.PI / 4))) + 7 + 1;
-			}
-			else
+			if (currSeg < 0)
 			{
-
+				Debug.Log($"negative current segment: {currSeg}, z: {z}");
 			}
 
-			if (currentSegment < 0)
+			if (currSeg != previousSegment)
 			{
-				Debug.Log($"negative current segment: {currentSegment}, z: {z}");
-			}
-
-			if (currentSegment != previousSegment)
-			{
-				previousSegment = currentSegment;
+				previousSegment = currSeg;
 				notiSegment(previousSegment);
 			}
+
+
 		}
 	}
 
 	public void resetCurrentSegment()
 	{ // NOTE: to avoid error when there are some individuals falling off the terrain and cause infinite spawn & destroy loop.
-		currentSegment = 0;
+		currSeg = 0;
 	}
 
 	private void notiSegment(int i)
