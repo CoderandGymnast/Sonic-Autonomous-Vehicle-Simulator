@@ -10,7 +10,7 @@ public class SegmentDetector : MonoBehaviour
 	private int preSeg;
 	public int currSeg { get; private set; }
 
-	int[] stopZs = {100};
+	int[] stopZs = {100, 150};
 	int[] stopXs = {50, 150};
 
 
@@ -47,8 +47,12 @@ public class SegmentDetector : MonoBehaviour
 			{
 				int additional = (int)Math.Floor((x - stopXs[0]) / 10);
 				currSeg = 12 + additional;
+			} else if(z <= stopZs[1]) {
+				int additional = (int)Math.Floor((Math.Atan((x - stopXs[1]) / (stopZs[1] - z)) / (Math.PI / 4))); 
+				currSeg = 21 + 1 + additional;
 			} else {
-
+				int additional = (int)Math.Floor((z - stopZs[1]) / 10);
+				currSeg = 24 + additional;
 			}
 
 			if (currSeg < 0)

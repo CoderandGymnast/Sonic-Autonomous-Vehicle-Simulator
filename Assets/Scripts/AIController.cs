@@ -84,7 +84,6 @@ public class AIController : MonoBehaviour
 			GameObject individual = individuals[i];
 			segmentDetector.vehicle = individual;
 			int currSeg = segmentDetector.currSeg;
-			//Debug.Log(currSeg);
 			AccidentDetector accidentDetector = individual.GetComponent<AccidentDetector>(); // NOTE: placing in assets to use.
 			if (accidentDetector.isFalling() || accidentDetector.isCollided) // NOTE: check whether individual 'falled off the terrain' or 'is collided'
 			{
@@ -122,7 +121,7 @@ public class AIController : MonoBehaviour
 		{
 
 			// TODO: spawn with positions relative to map, not terrain.
-			Vector3 pos = new Vector3(Random.Range(BARRIERS_WIDTH + VEHICLE_WIDTH / 2, ROAD_WIDTH - BARRIERS_WIDTH - VEHICLE_WIDTH / 2), STARTING_POSITION[1], STARTING_POSITION[2]); // NOTE: position. 
+			Vector3 pos = new Vector3(Random.Range(BARRIERS_WIDTH + VEHICLE_WIDTH / 2, ROAD_WIDTH - BARRIERS_WIDTH - VEHICLE_WIDTH / 2), STARTING_POSITION[1], STARTING_POSITION[2]); // NOTE: Change this to a fixed position and to detect segments in debug mode.
 			Quaternion rot = Quaternion.Euler(0, 0, 0); // NOTE: rotation.
 			individuals[i] = Instantiate(car, pos, rot);
 
