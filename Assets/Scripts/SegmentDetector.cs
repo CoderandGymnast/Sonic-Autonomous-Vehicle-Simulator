@@ -7,7 +7,7 @@ public class SegmentDetector : MonoBehaviour
 {
 	private static int START_SEGMENT = 0;
 	public GameObject vehicle;
-	private int previousSegment;
+	private int preSeg;
 	public int currSeg { get; private set; }
 
 	int[] stopZs = {100};
@@ -17,7 +17,7 @@ public class SegmentDetector : MonoBehaviour
 	// Start is called before the first frame update
 	void Start()
 	{
-		currSeg = previousSegment = START_SEGMENT;
+		currSeg = preSeg = START_SEGMENT;
 	}
 
 	// Update is called once per frame
@@ -56,10 +56,10 @@ public class SegmentDetector : MonoBehaviour
 				Debug.Log($"negative current segment: {currSeg}, z: {z}");
 			}
 
-			if (currSeg != previousSegment)
+			if (currSeg != preSeg)
 			{
-				previousSegment = currSeg;
-				notiSegment(previousSegment);
+				preSeg = currSeg;
+				notiSegment(preSeg);
 			}
 
 
