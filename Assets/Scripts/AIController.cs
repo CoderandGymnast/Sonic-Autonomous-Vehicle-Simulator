@@ -8,12 +8,14 @@ using Random = UnityEngine.Random;
 public class AIController : MonoBehaviour
 {
 
+	private static int NUM_SEGMENT = 33;
+
 	private static int VEHICLE_WIDTH = 3; // TODO: not hard-coded.
 	private static int BARRIERS_WIDTH = 1; // TODO: nothard-coded.
 	private static int ROAD_WIDTH = 50; // TODO: not hard-coded.
 	private static float[] STARTING_POSITION = { ROAD_WIDTH / 2, 0.5f, 5 }; // NOTE: to avoid cars falling off the map.
 	private static int POPULATION_SIZE = 5;
-	private static int CHROMOSOMES_SIZE = 10;
+	private static int CHROMOSOMES_SIZE = NUM_SEGMENT; // NOTE: total segments.
 	private float[,] accelerationChromosomes = new float[POPULATION_SIZE, CHROMOSOMES_SIZE];
 
 	private float[,] steeringChromosomes = new float[POPULATION_SIZE, CHROMOSOMES_SIZE];
@@ -28,7 +30,7 @@ public class AIController : MonoBehaviour
 	private int destroyCounter = 0; // TODO: move.
 
 	private int[] segManifest = new int[POPULATION_SIZE]; // NOTE: track latest segments of all entities (individuals) to calculate fitness.
-
+	private GAService GAService;
 	private void Awake()
 	{
 		//GameObject roadSegment = (GameObject)Resources.Load("RoadSegment", typeof(GameObject));
@@ -39,6 +41,10 @@ public class AIController : MonoBehaviour
 	void Start()
 	{
 		segmentDetector = gameObject.GetComponent<SegmentDetector>(); // TODO: refactor code.
+		GAService = (GAService) gameObject.GetComponent<GAService>(); // NOTE: GAService component belongs to AIController.
+		GAService.setNumSeg(NUM_SEGMENT);
+		GAService.setPopulationSize(POPULATION_SIZE);
+
 		initPopulation();
 		spawn();
 		car.SetActive(false); // NOTE: hide (deactivate) based individual.
@@ -57,7 +63,10 @@ public class AIController : MonoBehaviour
 		}
 		else
 		{
-			printSegmentManifest();
+
+			GAService.setSegManifest(segManifest); // NOTE: update segment manifest to calculate fitness.
+			GAService.process();
+			
 			car.SetActive(true);  // NOTE: activate based individual to spawn.
 			destroyCounter = 0;
 			segmentDetector.vehicle = null;
