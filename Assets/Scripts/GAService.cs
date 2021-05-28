@@ -40,6 +40,32 @@ public class GAService : MonoBehaviour
 		calculateFitnesses();
 		int[] population = doKSizeTournament(K);
 		doCrossover(population, 0.5f);
+		doMutation(0.1f);
+	}
+
+	/* Do mutation process. 
+	* @param     rate     Mutation rate.
+	*/
+	private void doMutation(float rate) {
+		int numGenes = populationSize*chromosomesSize;
+		int numMutation =(int) Mathf.Ceil(rate*numGenes);
+		int[] mutationGenes = new int[numMutation];
+		for(int i = 0; i < numMutation; i++) {
+			mutationGenes[i] = (int) Mathf.Ceil(100*Random.Range((float)chromosomesSize/100, (float)numGenes/100));
+		}
+		mutate(mutationGenes);
+	}
+
+	/* Mutate specified genes.
+	* @param     mutationGenes     All mutation gene indexes.
+	*/
+	private void mutate(int[] mutationGenes) {
+		foreach(var i in mutationGenes) {
+			int r = (int) Mathf.Floor(i/chromosomesSize);
+			int c = i%chromosomesSize;
+			childAccelerationChromosomes[r, c] += Random.Range(-0.2f, 0.2f);
+			childSteeringChromosomes[r,c] += Random.Range(-0.2f, 0.2f);
+		}
 	}
 
 	/* Get the index of the individual with the highest fitness value.
