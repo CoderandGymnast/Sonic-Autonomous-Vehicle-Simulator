@@ -30,7 +30,48 @@ public class GAService : MonoBehaviour
 	public void process()
 	{
 		calculateFitnesses();
-		int[] parents = doKSizeTournament(K);
+		int[] population = doKSizeTournament(K);
+		population = doCrossover(population, 0.25f);
+	}
+
+	/* Do crossover with the specified crossover rate.
+	* @param     parents     Candidate	parents.
+	* @param     rate          Crossover rate.
+	* @return                     Population after crossover.
+	*/
+	private int[] doCrossover(int[] population, double rate)
+	{
+
+		Debug.Log("Parents: ");
+		printInts(population);
+		ArrayList splittedPopulation = selectParentsForCrossover(population, rate);
+		ArrayList selected = (ArrayList)splittedPopulation[0];
+		ArrayList nonSelected = (ArrayList)splittedPopulation[1];
+		Debug.Log("Selected: ");
+		printArrList(selected);
+		Debug.Log("Non selected: ");
+		printArrList(nonSelected);
+		return new int[populationSize];
+	}
+
+	/* Select parents for crossover with the specified crossover rate.
+	* @param     candidates     Candidates to select as parents.
+	* @param     rate               Crossover rate.
+	* @return                          Selected parents.	
+	*/
+	private ArrayList selectParentsForCrossover(int[] candidates, double rate)
+	{
+		double[] randoms = generateRandoms(populationSize);
+		Debug.Log("Random: ");
+		printDoubles(randoms);
+		var selected = new ArrayList();
+		var nonSelected = new ArrayList();
+		for (int i = 0; i < populationSize; i++)
+			if (randoms[i] <= rate)
+				selected.Add(candidates[i]);
+			else
+				nonSelected.Add(candidates[i]);
+		return new ArrayList() { selected, nonSelected };
 	}
 
 	/* Calculate fitness value for each individual.
@@ -154,13 +195,19 @@ public class GAService : MonoBehaviour
 
 	private void printInts(int[] x)
 	{
-		for(int i = 0; i < x.Length; i++)
+		for (int i = 0; i < x.Length; i++)
 			Debug.Log($"{i}: " + x[i]);
 	}
 
 	private void printDoubles(double[] x)
 	{
-		for(int i = 0; i < x.Length; i++)
+		for (int i = 0; i < x.Length; i++)
+			Debug.Log($"{i}: " + x[i]);
+	}
+
+	private void printArrList(ArrayList x)
+	{
+		for (int i = 0; i < x.Count; i++)
 			Debug.Log($"{i}: " + x[i]);
 	}
 
