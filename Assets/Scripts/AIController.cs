@@ -64,7 +64,6 @@ public class AIController : MonoBehaviour
 		}
 		else
 		{
-			printParentChromosomes();
 			GAService.setSegManifest(segManifest); // NOTE: update segment manifest to calculate fitness.
 			GAService.setAccelerationChromosomes(this.accelerationChromosomes);
 			GAService.setSteeringChromosomes(this.steeringChromosomes);
@@ -72,8 +71,6 @@ public class AIController : MonoBehaviour
 
 			accelerationChromosomes = GAService.getChildAccelerationChromosomes();
 			steeringChromosomes = GAService.getChildSteeringChromosomes();
-
-			printParentChromosomes();
 
 			car.SetActive(true);  // NOTE: activate based individual to spawn.
 			destroyCounter = 0;

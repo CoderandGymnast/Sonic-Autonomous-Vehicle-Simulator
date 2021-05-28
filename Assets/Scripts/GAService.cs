@@ -40,25 +40,22 @@ public class GAService : MonoBehaviour
 		calculateFitnesses();
 		int[] population = doKSizeTournament(K);
 		doCrossover(population, 0.5f);
-		int maxFitnessI = getMaxFitness();
-			for (int j = 0; j < chromosomesSize; j++)
-			{
-				childAccelerationChromosomes[0, j] = accelerationChromosomes[maxFitnessI, j];
-				childSteeringChromosomes[0, j] = steeringChromosomes[maxFitnessI, j];
-			}
-
-		
 	}
 
-	private int getMaxFitness()
+	/* Get the index of the individual with the highest fitness value.
+	* @return     Index.
+	*/
+	private int getHighestFitnessIndex()
 	{
-		int max = 0;
+		int index = 0;
 		for (int i = 1; i < populationSize; i++)
-			if (fitnesses[i] > fitnesses[max])
-				max = i;
-		return max;
+			if (fitnesses[i] > fitnesses[index])
+				index = i;
+		return index;
 	}
 
+	/* Inititate the next generation.
+	*/
 	private void initChildChromosomes()
 	{
 		childAccelerationChromosomes = new float[populationSize, chromosomesSize];
@@ -73,14 +70,40 @@ public class GAService : MonoBehaviour
 	private int[] doCrossover(int[] population, double rate)
 	{
 
-		//Debug.Log("Parents: ");
-		//printInts(population);
-		ArrayList splittedPopulation = selectParentsForCrossover(population, rate);
-		ArrayList selected = (ArrayList)splittedPopulation[0];
-		ArrayList nonSelected = (ArrayList)splittedPopulation[1];
+		ArrayList selected = new ArrayList();
+		ArrayList nonSelected = new ArrayList();
+		while (selected.Count == 0) // NOTE: [FIX BUG]: selected.Count = 0;
+		{
+			ArrayList splittedPopulation = selectParentsForCrossover(population, rate);
+			selected = (ArrayList)splittedPopulation[0];
+			nonSelected = (ArrayList)splittedPopulation[1];
+		}
 
-		//printParentChromosomes();
+		int lowestFitnessIndexInNonSelected = getLowestFitnessIndexInNonSelected(nonSelected);
+		int highestFitnessIndex = getHighestFitnessIndex();
+		// NOTE: Elitism: 
+		//  - Make sure the individual with the highest fitness has a slot in the next generation.
+		//  - Replace the non-selected individual by the highest fitness individual.
+		nonSelected[lowestFitnessIndexInNonSelected] = highestFitnessIndex;
+		putNonSelectedToNextGeneration(nonSelected);
 
+		doUniformCrossover(selected, nonSelected.Count);
+		return new int[populationSize];
+	}
+
+	private int getLowestFitnessIndexInNonSelected(ArrayList nonSelected) {
+		int lowestFitnessOnNonSelected = 0;
+		for(int i = 0; i < nonSelected.Count; i++) 
+			if(fitnesses[(int) nonSelected[i]] < fitnesses[lowestFitnessOnNonSelected])
+				lowestFitnessOnNonSelected = i;
+		return lowestFitnessOnNonSelected;
+	}
+
+	/* Put all individuals not selected as parents for crossover to the next generation.
+	* @param     nonSelected     All non-selected individuals
+	*/
+	private void putNonSelectedToNextGeneration(ArrayList nonSelected)
+	{
 		for (int i = 0; i < nonSelected.Count; i++)
 			for (int j = 0; j < chromosomesSize; j++)
 			{
@@ -88,15 +111,6 @@ public class GAService : MonoBehaviour
 				childSteeringChromosomes[i, j] = steeringChromosomes[(int)nonSelected[i], j];
 			}
 
-		//Debug.Log("Populate non selected:");
-		//printChildChromosomes();
-
-		//Debug.Log("Selected: ");
-		//printArrList(selected);
-		//Debug.Log("Non selected: ");
-		//printArrList(nonSelected);
-		doUniformCrossover(selected, nonSelected.Count);
-		return new int[populationSize];
 	}
 
 	/* Do uniform crossover over individials with specified indexes.
@@ -105,10 +119,6 @@ public class GAService : MonoBehaviour
 	private void doUniformCrossover(ArrayList selected, int nonSelectedCount)
 	{
 		ArrayList clone = createShiftedClone(selected);
-		// Debug.Log("Shifted clone: ");
-		// printArrList(clone);
-		//printParentChromosomes();
-
 
 		for (int i = 0; i < selected.Count; i++)
 			for (int j = 0; j < chromosomesSize; j++)
@@ -117,7 +127,6 @@ public class GAService : MonoBehaviour
 				childAccelerationChromosomes[nonSelectedCount + i, j] = random <= 0.5 ? accelerationChromosomes[(int)selected[i], j] : accelerationChromosomes[(int)clone[i], j];
 				childSteeringChromosomes[nonSelectedCount + i, j] = random <= 0.5 ? steeringChromosomes[(int)selected[i], j] : steeringChromosomes[(int)clone[i], j];
 			}
-		//printChildChromosomes();
 	}
 
 	/* Create shifted clone of selected to crossover.
@@ -141,8 +150,6 @@ public class GAService : MonoBehaviour
 	private ArrayList selectParentsForCrossover(int[] candidates, double rate)
 	{
 		double[] randoms = generateRandoms(populationSize);
-		// Debug.Log("Random: ");
-		// printDoubles(randoms);
 		var selected = new ArrayList();
 		var nonSelected = new ArrayList();
 		for (int i = 0; i < populationSize; i++)
@@ -301,13 +308,13 @@ public class GAService : MonoBehaviour
 				Debug.Log($"Gene {j}: {this.accelerationChromosomes[i, j]}");
 		}
 
-		// Debug.Log("Steering: ");
-		// for (int i = 0; i < populationSize; i++)
-		// {
-		// 	Debug.Log($"Individual {i}:");
-		// 	for (int j = 0; j < chromosomesSize; j++)
-		// 		Debug.Log($"Gene {j}: {this.steeringChromosomes[i, j]}");
-		// }
+		Debug.Log("Steering: ");
+		for (int i = 0; i < populationSize; i++)
+		{
+			Debug.Log($"Individual {i}:");
+			for (int j = 0; j < chromosomesSize; j++)
+				Debug.Log($"Gene {j}: {this.steeringChromosomes[i, j]}");
+		}
 	}
 
 	private void printChildChromosomes()
@@ -321,13 +328,13 @@ public class GAService : MonoBehaviour
 				Debug.Log($"Gene {j}: {this.childAccelerationChromosomes[i, j]}");
 		}
 
-		// Debug.Log("Steering: ");
-		// for (int i = 0; i < populationSize; i++)
-		// {
-		// 	Debug.Log($"Individual {i}:");
-		// 	for (int j = 0; j < chromosomesSize; j++)
-		// 		Debug.Log($"Gene {j}: {this.childSteeringChromosomes[i, j]}");
-		// }
+		Debug.Log("Steering: ");
+		for (int i = 0; i < populationSize; i++)
+		{
+			Debug.Log($"Individual {i}:");
+			for (int j = 0; j < chromosomesSize; j++)
+				Debug.Log($"Gene {j}: {this.childSteeringChromosomes[i, j]}");
+		}
 	}
 
 	public void setNumSeg(int numSeg)
