@@ -41,9 +41,10 @@ public class AIController : MonoBehaviour
 	void Start()
 	{
 		segmentDetector = gameObject.GetComponent<SegmentDetector>(); // TODO: refactor code.
-		GAService = (GAService) gameObject.GetComponent<GAService>(); // NOTE: GAService component belongs to AIController.
+		GAService = (GAService)gameObject.GetComponent<GAService>(); // NOTE: GAService component belongs to AIController.
 		GAService.setNumSeg(NUM_SEGMENT);
 		GAService.setPopulationSize(POPULATION_SIZE);
+		GAService.setChromosomesSize(CHROMOSOMES_SIZE);
 
 		initPopulation();
 		spawn();
@@ -63,14 +64,20 @@ public class AIController : MonoBehaviour
 		}
 		else
 		{
-
+			printParentChromosomes();
 			GAService.setSegManifest(segManifest); // NOTE: update segment manifest to calculate fitness.
+			GAService.setAccelerationChromosomes(this.accelerationChromosomes);
+			GAService.setSteeringChromosomes(this.steeringChromosomes);
 			GAService.process();
-			
+
+			accelerationChromosomes = GAService.getChildAccelerationChromosomes();
+			steeringChromosomes = GAService.getChildSteeringChromosomes();
+
+			printParentChromosomes();
+
 			car.SetActive(true);  // NOTE: activate based individual to spawn.
 			destroyCounter = 0;
 			segmentDetector.vehicle = null;
-			initPopulation();
 			spawn();
 			car.SetActive(false); // NOTE: hide (deactivate) based individual.
 		}
@@ -114,7 +121,7 @@ public class AIController : MonoBehaviour
 		{
 			for (int j = 0; j < CHROMOSOMES_SIZE; j++)
 			{
-				accelerationChromosomes[i, j] = (float)Math.Round(Random.Range(0.0f, 1.0f), 2); // TODO: not hard-coded.
+				accelerationChromosomes[i, j] = (float)Math.Round(Random.Range(0.9f, 1.0f), 2); // TODO: not hard-coded.
 				steeringChromosomes[i, j] = (float)Math.Round(Random.Range(-1.0f, 1.0f), 2);
 			}
 
@@ -127,7 +134,8 @@ public class AIController : MonoBehaviour
 		{
 
 			// TODO: spawn with positions relative to map, not terrain.
-			Vector3 pos = new Vector3(Random.Range(BARRIERS_WIDTH + VEHICLE_WIDTH / 2, ROAD_WIDTH - BARRIERS_WIDTH - VEHICLE_WIDTH / 2), STARTING_POSITION[1], STARTING_POSITION[2]); // NOTE: Change this to a fixed position and to detect segments in debug mode.
+			//Vector3 pos = new Vector3(Random.Range(BARRIERS_WIDTH + VEHICLE_WIDTH / 2, ROAD_WIDTH - BARRIERS_WIDTH - VEHICLE_WIDTH / 2), STARTING_POSITION[1], STARTING_POSITION[2]); // NOTE: Change this to a fixed position and to detect segments in debug mode.	
+			Vector3 pos = new Vector3(25f, 0.5f, 6.5f);
 			Quaternion rot = Quaternion.Euler(0, 0, 0); // NOTE: rotation.
 			individuals[i] = Instantiate(car, pos, rot);
 

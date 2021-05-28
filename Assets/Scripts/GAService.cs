@@ -8,9 +8,16 @@ public class GAService : MonoBehaviour
 
 	private int numSeg = 0; // NOTE: segment number.
 	private int populationSize;
+	private int chromosomesSize;
 	private int[] segManifest; // NOTE: Achieved segment number of all individuals.
 	private double[] fitnesses;
 	private static int K = 3; // NOTE: K-size tournament.
+	private float[,] accelerationChromosomes;
+	private float[,] steeringChromosomes;
+	private float[,] childAccelerationChromosomes;
+	private float[,] childSteeringChromosomes;
+
+
 
 	private void Awake()
 	{
@@ -29,9 +36,33 @@ public class GAService : MonoBehaviour
 
 	public void process()
 	{
+		initChildChromosomes();
 		calculateFitnesses();
 		int[] population = doKSizeTournament(K);
-		population = doCrossover(population, 0.25f);
+		doCrossover(population, 0.5f);
+		int maxFitnessI = getMaxFitness();
+			for (int j = 0; j < chromosomesSize; j++)
+			{
+				childAccelerationChromosomes[0, j] = accelerationChromosomes[maxFitnessI, j];
+				childSteeringChromosomes[0, j] = steeringChromosomes[maxFitnessI, j];
+			}
+
+		
+	}
+
+	private int getMaxFitness()
+	{
+		int max = 0;
+		for (int i = 1; i < populationSize; i++)
+			if (fitnesses[i] > fitnesses[max])
+				max = i;
+		return max;
+	}
+
+	private void initChildChromosomes()
+	{
+		childAccelerationChromosomes = new float[populationSize, chromosomesSize];
+		childSteeringChromosomes = new float[populationSize, chromosomesSize];
 	}
 
 	/* Do crossover with the specified crossover rate.
@@ -42,16 +73,64 @@ public class GAService : MonoBehaviour
 	private int[] doCrossover(int[] population, double rate)
 	{
 
-		Debug.Log("Parents: ");
-		printInts(population);
+		//Debug.Log("Parents: ");
+		//printInts(population);
 		ArrayList splittedPopulation = selectParentsForCrossover(population, rate);
 		ArrayList selected = (ArrayList)splittedPopulation[0];
 		ArrayList nonSelected = (ArrayList)splittedPopulation[1];
-		Debug.Log("Selected: ");
-		printArrList(selected);
-		Debug.Log("Non selected: ");
-		printArrList(nonSelected);
+
+		//printParentChromosomes();
+
+		for (int i = 0; i < nonSelected.Count; i++)
+			for (int j = 0; j < chromosomesSize; j++)
+			{
+				childAccelerationChromosomes[i, j] = accelerationChromosomes[(int)nonSelected[i], j];
+				childSteeringChromosomes[i, j] = steeringChromosomes[(int)nonSelected[i], j];
+			}
+
+		//Debug.Log("Populate non selected:");
+		//printChildChromosomes();
+
+		//Debug.Log("Selected: ");
+		//printArrList(selected);
+		//Debug.Log("Non selected: ");
+		//printArrList(nonSelected);
+		doUniformCrossover(selected, nonSelected.Count);
 		return new int[populationSize];
+	}
+
+	/* Do uniform crossover over individials with specified indexes.
+	* @param     selected     Indexes of selected individuals as parents.
+	*/
+	private void doUniformCrossover(ArrayList selected, int nonSelectedCount)
+	{
+		ArrayList clone = createShiftedClone(selected);
+		// Debug.Log("Shifted clone: ");
+		// printArrList(clone);
+		//printParentChromosomes();
+
+
+		for (int i = 0; i < selected.Count; i++)
+			for (int j = 0; j < chromosomesSize; j++)
+			{
+				double random = generateRandoms(1)[0];
+				childAccelerationChromosomes[nonSelectedCount + i, j] = random <= 0.5 ? accelerationChromosomes[(int)selected[i], j] : accelerationChromosomes[(int)clone[i], j];
+				childSteeringChromosomes[nonSelectedCount + i, j] = random <= 0.5 ? steeringChromosomes[(int)selected[i], j] : steeringChromosomes[(int)clone[i], j];
+			}
+		//printChildChromosomes();
+	}
+
+	/* Create shifted clone of selected to crossover.
+	* @param     selected     Indexes of selected individuals as parents.
+	* @return                      Shifted clone.
+	*/
+	private ArrayList createShiftedClone(ArrayList selected)
+	{
+		ArrayList clone = new ArrayList();
+		for (int i = 1; i < selected.Count; i++)
+			clone.Add(selected[i]);
+		clone.Add(selected[0]);
+		return clone;
 	}
 
 	/* Select parents for crossover with the specified crossover rate.
@@ -62,8 +141,8 @@ public class GAService : MonoBehaviour
 	private ArrayList selectParentsForCrossover(int[] candidates, double rate)
 	{
 		double[] randoms = generateRandoms(populationSize);
-		Debug.Log("Random: ");
-		printDoubles(randoms);
+		// Debug.Log("Random: ");
+		// printDoubles(randoms);
 		var selected = new ArrayList();
 		var nonSelected = new ArrayList();
 		for (int i = 0; i < populationSize; i++)
@@ -211,6 +290,46 @@ public class GAService : MonoBehaviour
 			Debug.Log($"{i}: " + x[i]);
 	}
 
+	private void printParentChromosomes()
+	{
+		Debug.Log("Parent: ");
+		Debug.Log("Acceleration: ");
+		for (int i = 0; i < populationSize; i++)
+		{
+			Debug.Log($"Individual {i}:");
+			for (int j = 0; j < chromosomesSize; j++)
+				Debug.Log($"Gene {j}: {this.accelerationChromosomes[i, j]}");
+		}
+
+		// Debug.Log("Steering: ");
+		// for (int i = 0; i < populationSize; i++)
+		// {
+		// 	Debug.Log($"Individual {i}:");
+		// 	for (int j = 0; j < chromosomesSize; j++)
+		// 		Debug.Log($"Gene {j}: {this.steeringChromosomes[i, j]}");
+		// }
+	}
+
+	private void printChildChromosomes()
+	{
+		Debug.Log("Child: ");
+		Debug.Log("Acceleration: ");
+		for (int i = 0; i < populationSize; i++)
+		{
+			Debug.Log($"Individual {i}:");
+			for (int j = 0; j < chromosomesSize; j++)
+				Debug.Log($"Gene {j}: {this.childAccelerationChromosomes[i, j]}");
+		}
+
+		// Debug.Log("Steering: ");
+		// for (int i = 0; i < populationSize; i++)
+		// {
+		// 	Debug.Log($"Individual {i}:");
+		// 	for (int j = 0; j < chromosomesSize; j++)
+		// 		Debug.Log($"Gene {j}: {this.childSteeringChromosomes[i, j]}");
+		// }
+	}
+
 	public void setNumSeg(int numSeg)
 	{
 		this.numSeg = numSeg;
@@ -240,5 +359,40 @@ public class GAService : MonoBehaviour
 	public int getPolulationSize()
 	{
 		return this.populationSize;
+	}
+
+	public void setChromosomesSize(int size)
+	{
+		this.chromosomesSize = size;
+	}
+
+	public int getChromosomesSize()
+	{
+		return this.chromosomesSize;
+	}
+
+	public void setAccelerationChromosomes(float[,] chromosomes)
+	{
+		this.accelerationChromosomes = chromosomes;
+	}
+
+	public float[,] getAccelerationChromosomes()
+	{
+		return this.accelerationChromosomes;
+	}
+
+	public void setSteeringChromosomes(float[,] chromosomes)
+	{
+		this.steeringChromosomes = chromosomes;
+	}
+
+	public float[,] getChildAccelerationChromosomes()
+	{
+		return childAccelerationChromosomes;
+	}
+
+	public float[,] getChildSteeringChromosomes()
+	{
+		return childSteeringChromosomes;
 	}
 }
