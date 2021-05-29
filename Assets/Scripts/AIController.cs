@@ -14,7 +14,7 @@ public class AIController : MonoBehaviour
 	private static int BARRIERS_WIDTH = 1; // TODO: nothard-coded.
 	private static int ROAD_WIDTH = 50; // TODO: not hard-coded.
 	private static float[] STARTING_POSITION = { ROAD_WIDTH / 2, 0.5f, 5 }; // NOTE: to avoid cars falling off the map.
-	private static int POPULATION_SIZE = 5;
+	private static int POPULATION_SIZE = 50;
 	private static int CHROMOSOMES_SIZE = NUM_SEGMENT; // NOTE: total segments.
 	private float[,] accelerationChromosomes = new float[POPULATION_SIZE, CHROMOSOMES_SIZE];
 
@@ -72,12 +72,19 @@ public class AIController : MonoBehaviour
 			accelerationChromosomes = GAService.getChildAccelerationChromosomes();
 			steeringChromosomes = GAService.getChildSteeringChromosomes();
 
+			resetSegManifest();
 			car.SetActive(true);  // NOTE: activate based individual to spawn.
 			destroyCounter = 0;
 			segmentDetector.vehicle = null;
 			spawn();
 			car.SetActive(false); // NOTE: hide (deactivate) based individual.
 		}
+	}
+
+	/*
+	*/
+	private void resetSegManifest() {
+		segManifest = new int[POPULATION_SIZE];
 	}
 
 	private void movePopulation()
@@ -92,16 +99,17 @@ public class AIController : MonoBehaviour
 			segmentDetector.vehicle = individual;
 			int currSeg = segmentDetector.currSeg;
 
-			segManifest[i] = currSeg; // NOTE: update latest segment of each entitiy (individual)
-
 			AccidentDetector accidentDetector = individual.GetComponent<AccidentDetector>(); // NOTE: placing in assets to use.
-			if (accidentDetector.isFalling() || accidentDetector.isCollided) // NOTE: check whether individual 'falled off the terrain' or 'is collided'
+			if (accidentDetector.isFalling() || accidentDetector.isCollided || currSeg < segManifest[i]) // NOTE: check whether individual 'falled off the terrain' or 'is collided'
 			{
 				Destroy(individual);
 				destroyCounter++;
 				individuals[i] = null;
 				continue;
 			}
+			
+			segManifest[i] = currSeg; // NOTE: update latest segment of each entitiy (individual)
+
 			CarController controller = individual.GetComponent<CarController>();
 			float acc = accelerationChromosomes[i, currSeg];
 			float steer = steeringChromosomes[i, currSeg];

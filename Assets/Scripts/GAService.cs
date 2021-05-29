@@ -135,8 +135,6 @@ public class GAService : MonoBehaviour
 		// NOTE: Elitism: 
 		//  - Make sure the individual with the highest fitness has a slot in the next generation.
 		//  - Replace the non-selected individual by the highest fitness individual.
-		Debug.Log("Num: " + nonSelected.Count);
-		Debug.Log("Index" + lowestFitnessIndexInNonSelected);
 		nonSelected[lowestFitnessIndexInNonSelected] = highestFitnessIndex;
 		putNonSelectedToNextGeneration(nonSelected);
 
