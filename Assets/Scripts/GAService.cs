@@ -45,15 +45,16 @@ public class GAService : MonoBehaviour
 		doMutation(0.1f);
 	}
 
-	private void mutateOutlier(int oID, int cID)
+	private void mutateOutlier(int oID, int nonSelectedCount)
 	{
 		try
 		{
 			int outlierSeg = segManifest[oID];
+			for(int n = 0; n < nonSelectedCount; n++)
 			for (int i = outlierSeg - 1; i < chromosomesSize; i++)
 			{
-				childSteeringChromosomes[cID, i] = (float)Math.Round(Random.Range(0.9f, 1.0f), 2); // TODO: not hard-coded.
-				steeringChromosomes[cID, i] = (float)Math.Round(Random.Range(-1.0f, 1.0f), 2);
+				childSteeringChromosomes[n, i] = (float)Math.Round(Random.Range(0.9f, 1.0f), 2); // TODO: not hard-coded.
+				steeringChromosomes[n, i] = (float)Math.Round(Random.Range(-1.0f, 1.0f), 2);
 			}
 		}
 		catch (Exception e)
@@ -136,9 +137,9 @@ public class GAService : MonoBehaviour
 		//  - Make sure the individual with the highest fitness has a slot in the next generation.
 		//  - Replace the non-selected individual by the highest fitness individual.
 		nonSelected[lowestFitnessIndexInNonSelected] = highestFitnessIndex;
-		putNonSelectedToNextGeneration(nonSelected);
+		putNonSelectedToNextGeneration(nonSelected, highestFitnessIndex);
 
-		mutateOutlier(highestFitnessIndex, lowestFitnessIndexInNonSelected);
+		mutateOutlier(highestFitnessIndex, nonSelected.Count);
 
 		doUniformCrossover(selected, nonSelected.Count);
 		return new int[populationSize];
@@ -156,13 +157,13 @@ public class GAService : MonoBehaviour
 	/* Put all individuals not selected as parents for crossover to the next generation.
 	* @param     nonSelected     All non-selected individuals
 	*/
-	private void putNonSelectedToNextGeneration(ArrayList nonSelected)
+	private void putNonSelectedToNextGeneration(ArrayList nonSelected, int outlierID)
 	{
 		for (int i = 0; i < nonSelected.Count; i++)
 			for (int j = 0; j < chromosomesSize; j++)
 			{
-				childAccelerationChromosomes[i, j] = accelerationChromosomes[(int)nonSelected[i], j];
-				childSteeringChromosomes[i, j] = steeringChromosomes[(int)nonSelected[i], j];
+				childAccelerationChromosomes[i, j] = accelerationChromosomes[outlierID, j];
+				childSteeringChromosomes[i, j] = steeringChromosomes[outlierID, j];
 			}
 
 	}

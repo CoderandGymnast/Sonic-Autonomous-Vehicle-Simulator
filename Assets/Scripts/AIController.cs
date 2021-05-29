@@ -100,7 +100,7 @@ public class AIController : MonoBehaviour
 			int currSeg = segmentDetector.currSeg;
 
 			AccidentDetector accidentDetector = individual.GetComponent<AccidentDetector>(); // NOTE: placing in assets to use.
-			if (accidentDetector.isFalling() || accidentDetector.isCollided || currSeg < segManifest[i]) // NOTE: check whether individual 'falled off the terrain' or 'is collided'
+			if (accidentDetector.isFalling() || accidentDetector.isCollided) // NOTE: check whether individual 'falled off the terrain' or 'is collided'
 			{
 				Destroy(individual);
 				destroyCounter++;
