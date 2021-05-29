@@ -1,4 +1,6 @@
 using System.Collections;
+using System;
+using Random = UnityEngine.Random;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -43,15 +45,34 @@ public class GAService : MonoBehaviour
 		doMutation(0.1f);
 	}
 
+	private void mutateOutlier(int oID, int cID)
+	{
+		try
+		{
+			int outlierSeg = segManifest[oID];
+			for (int i = outlierSeg - 1; i < chromosomesSize; i++)
+			{
+				childSteeringChromosomes[cID, i] = (float)Math.Round(Random.Range(0.9f, 1.0f), 2); // TODO: not hard-coded.
+				steeringChromosomes[cID, i] = (float)Math.Round(Random.Range(-1.0f, 1.0f), 2);
+			}
+		}
+		catch (Exception e)
+		{
+			Debug.Log("[ERROR]: mutateOutlier" + e);
+		}
+	}
+
 	/* Do mutation process. 
 	* @param     rate     Mutation rate.
 	*/
-	private void doMutation(float rate) {
-		int numGenes = populationSize*chromosomesSize;
-		int numMutation =(int) Mathf.Ceil(rate*numGenes);
+	private void doMutation(float rate)
+	{
+		int numGenes = populationSize * chromosomesSize;
+		int numMutation = (int)Mathf.Ceil(rate * numGenes);
 		int[] mutationGenes = new int[numMutation];
-		for(int i = 0; i < numMutation; i++) {
-			mutationGenes[i] = (int) Mathf.Ceil(100*Random.Range((float)chromosomesSize/100, (float)numGenes/100));
+		for (int i = 0; i < numMutation; i++)
+		{
+			mutationGenes[i] = (int)Mathf.Ceil(100 * Random.Range((float)chromosomesSize / 100, (float)numGenes / 100));
 		}
 		mutate(mutationGenes);
 	}
@@ -59,12 +80,16 @@ public class GAService : MonoBehaviour
 	/* Mutate specified genes.
 	* @param     mutationGenes     All mutation gene indexes.
 	*/
-	private void mutate(int[] mutationGenes) {
-		foreach(var i in mutationGenes) {
-			int r = (int) Mathf.Floor(i/chromosomesSize);
-			int c = i%chromosomesSize;
+	private void mutate(int[] mutationGenes)
+	{
+		foreach (var i in mutationGenes)
+		{
+			int r = (int)Mathf.Floor(i / chromosomesSize);
+			int c = (i % chromosomesSize) - 1; // NOTE: [FIX BUG]: index was outside the bounds of the array.
+			c = c < 0 ? 0 : c;
+			r = r == populationSize ? populationSize - 1 : r;
 			childAccelerationChromosomes[r, c] += Random.Range(-0.2f, 0.2f);
-			childSteeringChromosomes[r,c] += Random.Range(-0.2f, 0.2f);
+			childSteeringChromosomes[r, c] += Random.Range(-0.2f, 0.2f);
 		}
 	}
 
@@ -110,17 +135,22 @@ public class GAService : MonoBehaviour
 		// NOTE: Elitism: 
 		//  - Make sure the individual with the highest fitness has a slot in the next generation.
 		//  - Replace the non-selected individual by the highest fitness individual.
+		Debug.Log("Num: " + nonSelected.Count);
+		Debug.Log("Index" + lowestFitnessIndexInNonSelected);
 		nonSelected[lowestFitnessIndexInNonSelected] = highestFitnessIndex;
 		putNonSelectedToNextGeneration(nonSelected);
+
+		mutateOutlier(highestFitnessIndex, lowestFitnessIndexInNonSelected);
 
 		doUniformCrossover(selected, nonSelected.Count);
 		return new int[populationSize];
 	}
 
-	private int getLowestFitnessIndexInNonSelected(ArrayList nonSelected) {
+	private int getLowestFitnessIndexInNonSelected(ArrayList nonSelected)
+	{
 		int lowestFitnessOnNonSelected = 0;
-		for(int i = 0; i < nonSelected.Count; i++) 
-			if(fitnesses[(int) nonSelected[i]] < fitnesses[lowestFitnessOnNonSelected])
+		for (int i = 0; i < nonSelected.Count; i++)
+			if (fitnesses[(int)nonSelected[i]] < fitnesses[lowestFitnessOnNonSelected])
 				lowestFitnessOnNonSelected = i;
 		return lowestFitnessOnNonSelected;
 	}
